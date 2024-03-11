@@ -4,15 +4,6 @@ from makeCSV import add_data
 
 ##### NDR means No Data Reported #####
 
-### Test URLS
-## All Info Present
-# URL = "https://www.kannapedia.net/strains/rsp10585"
-## CBs no Terps
-# URL = "https://www.kannapedia.net/strains/rsp10763"
-## No CBs no Terps
-# URL ="https://www.kannapedia.net/strains/rsp13088"
-
-
 # Make the soup
 def get_data(url):
     response = requests.get(url)
@@ -101,24 +92,27 @@ def get_data(url):
             scraped_dict["Report Type"] = "NDR"
             print("Report Type:", "NDR")
 
-        # Rarity Value
-        rarity_value_element = soup.find('figcaption', class_='DataPlot--caption')
-        if rarity_value_element:
+# Rarity and Heterozygosity, now bug free
+        heterozygosity_element = soup.find_all(name='figcaption', class_='DataPlot--caption')
+        if len(heterozygosity_element) == 2:
+            rarity_value_element = soup.find('figcaption', class_='DataPlot--caption')
             rarity_value = rarity_value_element.strong.a.text.strip()
             scraped_dict["Rarity"] = rarity_value
             print("Rarity:", rarity_value)
-        else:
-            scraped_dict["Rarity"] = "NDR"
-            print("Rarity:", "NDR")
 
-        # Genetic Information
-        # Heterozygosity
-        heterozygosity_element = soup.find_all(name='figcaption', class_='DataPlot--caption')
-        if heterozygosity_element:
             heterozygosity = heterozygosity_element[1].strong.text.strip()
             scraped_dict["Heterozygosity"] = heterozygosity
             print("Heterozygosity:", heterozygosity)
+
+        elif len(heterozygosity_element) == 1:
+            scraped_dict["Rarity"] = "NDR"
+            print("Rarity:", "NDR")
+            heterozygosity = heterozygosity_element[0].strong.text.strip()
+            scraped_dict["Heterozygosity"] = heterozygosity
+            print("Heterozygosity:", heterozygosity)
         else:
+            scraped_dict["Rarity"] = "NDR"
+            print("Rarity:", "NDR")
             scraped_dict["Heterozygosity"] = "NDR"
             print("Heterozygosity:", "NDR")
 
@@ -177,4 +171,13 @@ def get_data(url):
         add_data(scraped_dict)
 
 # For testing code
-# get_data(URL)
+### Test URLS
+## All Info Present
+# url = "https://www.kannapedia.net/strains/rsp10585"
+## CBs no Terps
+# url = "https://www.kannapedia.net/strains/rsp10763"
+## No CBs no Terps
+# url ="https://www.kannapedia.net/strains/rsp13088"
+## No Rarity
+# url = "https://www.kannapedia.net/strains/rsp10950"
+# get_data(url)
